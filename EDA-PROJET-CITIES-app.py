@@ -64,7 +64,7 @@ selected_countries = st.sidebar.multiselect(
 
 # Population Filter
 min_pop = 0
-max_pop = int(df["population"].fillna(0).max())
+max_pop = int(pd.to_numeric(df["population"], errors="coerce").fillna(0).max())
 
 population_range = st.sidebar.slider(
     "Population Range",
