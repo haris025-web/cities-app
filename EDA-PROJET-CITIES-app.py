@@ -46,8 +46,11 @@ selected_countries = st.sidebar.multiselect(
     default=countries[:5]
 )
 
-min_pop = int(df["population"].fillna(0).min())
-max_pop = int(df["population"].fillna(0).max())
+df["population"] = pd.to_numeric(df["population"], errors="coerce")
+df["population"] = df["population"].fillna(0)
+
+min_pop = int(df["population"].min())
+max_pop = int(df["population"].max())
 
 population_range = st.sidebar.slider(
     "Population Range",
