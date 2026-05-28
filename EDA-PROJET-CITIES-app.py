@@ -22,11 +22,16 @@ def load_data():
         names=columns,
         low_memory=False
     )
+numeric_cols = ["latitude", "longitude", "population", "elevation", "dem"]
 
-    numeric_cols = ["latitude", "longitude", "population", "elevation", "dem"]
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    for col in numeric_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+# Clean population column
+df["population"] = df["population"].fillna(0)
+
+# Convert safely
+df["population"] = df["population"].astype(float)
 
     return df
 
@@ -49,8 +54,8 @@ selected_countries = st.sidebar.multiselect(
 df["population"] = pd.to_numeric(df["population"], errors="coerce")
 df["population"] = df["population"].fillna(0)
 
-min_pop = int(df["population"].min())
-max_pop = int(df["population"].max())
+min_pop = int(float(df["population"].min()))
+max_pop = int(float(df["population"].max()))
 
 population_range = st.sidebar.slider(
     "Population Range",
