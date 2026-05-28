@@ -6,11 +6,9 @@ import seaborn as sns
 # Page Config
 st.set_page_config(page_title="Global Cities Dashboard", layout="wide")
 
-
-# Load Data Function
+# Load Data
 @st.cache_data
 def load_data():
-
     columns = [
         "geonameid", "name", "asciiname", "alternatenames",
         "latitude", "longitude", "feature_class", "feature_code",
@@ -19,61 +17,80 @@ def load_data():
         "elevation", "dem", "timezone", "modification_date"
     ]
 
-    df = pd.read_csv(
-        "data/cities500.txt",
-        sep="\t",
-        header=None,
-        names=columns,
-        low_memory=False
-    )
+    try:
+        df = pd.read_csv(
+            "data/cities500.txt",
+            sep="\t",
+            header=None,
+            names=columns,
+            low_memory=False
+        )
 
-    # Convert numeric columns safely
-    numeric_cols = ["latitude", "longitude", "population", "elevation", "dem"]
+        numeric_cols = [
+            "latitude",
+            "longitude",
+            "population",
+            "elevation",
+            "dem"
+        ]
 
-    for col in numeric_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # Clean population column
-    df["population"] = df["population"].fillna(0)
-    df["population"] = df["population"].astype(float)
+        df["population"] = df["population"].fillna(0)
 
-    return df
+        return df
 
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame(columns=columns)
 
 # Load Dataset
 df = load_data()
-df["population"] = pd.to_numeric(df["population"], errors="coerce")
-df["population"] = df["population"].fillna(0)
+
+if df.empty:
+    st.error("Dataset could not be loaded. Check that data/cities500.txt exists in GitHub.")
+    st.stop()
+
 # Dashboard Title
 st.title("🌍 Global Cities Data Visualization Dashboard")
 st.markdown(
     "Professional interactive dashboard built with Streamlit, Pandas, Matplotlib, and Seaborn."
 )
 
-# Sidebar Filters
+# Sidebar
 st.sidebar.header("Dashboard Filters")
 
-# Country Filter
 countries = sorted(df["country_code"].dropna().unique())
 
 selected_countries = st.sidebar.multiselect(
     "Select Countries",
     countries,
-    default=countries[:5]
+    default=countries[:5] if len(countries) >= 5 else countries
 )
 
-# Population Filter
-min_pop = 0
-max_pop = int(pd.to_numeric(df["population"], errors="coerce").fillna(0).max())
+population_series = pd.to_numeric(
+    df["population"],
+    errors="coerce"
+).fillna(0)
+
+max_pop = int(population_series.max()) if len(population_series) > 0 else 1000000
+
+if max_pop <= 0:
+    max_pop = 1000000
 
 population_range = st.sidebar.slider(
     "Population Range",
-    min_pop,
+    0,
     max_pop,
-    (0, int(df["population"].quantile(0.95)))
+    (
+        0,
+        int(population_series.quantile(0.95))
+        if len(population_series) > 0
+        else max_pop
+    )
 )
 
-# Search Box
 search_city = st.sidebar.text_input("Search City")
 
 # Filter Data
@@ -91,8 +108,16 @@ filtered_df = filtered_df[
 
 if search_city:
     filtered_df = filtered_df[
-        filtered_df["name"].str.contains(search_city, case=False, na=False)
+        filtered_df["name"].astype(str).str.contains(
+            search_city,
+            case=False,
+            na=False
+        )
     ]
+
+if filtered_df.empty:
+    st.warning("No records match the selected filters.")
+    st.stop()
 
 # KPI Cards
 k1, k2, k3, k4 = st.columns(4)
@@ -107,7 +132,6 @@ st.markdown("---")
 # Charts
 c1, c2 = st.columns(2)
 
-# Bar Chart
 with c1:
     st.subheader("Bar Chart - Top Countries by City Count")
 
@@ -118,28 +142,29 @@ with c1:
         ax=ax
     )
 
-    ax.set_xlabel("Country")
-    ax.set_ylabel("City Count")
-
     st.pyplot(fig)
 
-# Pie Chart
 with c2:
     st.subheader("Pie Chart - Population Distribution")
 
-    pie_data = filtered_df.groupby("country_code")["population"].sum().head(5)
+    pie_data = (
+        filtered_df.groupby("country_code")["population"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(5)
+    )
 
     fig, ax = plt.subplots(figsize=(7, 5))
 
-    ax.pie(
-        pie_data,
-        labels=pie_data.index,
-        autopct="%1.1f%%"
-    )
+    if len(pie_data) > 0:
+        ax.pie(
+            pie_data,
+            labels=pie_data.index,
+            autopct="%1.1f%%"
+        )
 
     st.pyplot(fig)
 
-# Histogram and Scatter Plot
 c3, c4 = st.columns(2)
 
 with c3:
@@ -148,7 +173,7 @@ with c3:
     fig, ax = plt.subplots(figsize=(7, 5))
 
     sns.histplot(
-        filtered_df["population"].dropna(),
+        filtered_df["population"],
         bins=30,
         ax=ax
     )
@@ -162,18 +187,18 @@ with c4:
 
     sample_size = min(2000, len(filtered_df))
 
-    sns.scatterplot(
-        data=filtered_df.sample(sample_size),
-        x="longitude",
-        y="latitude",
-        size="population",
-        legend=False,
-        ax=ax
-    )
+    if sample_size > 0:
+        sns.scatterplot(
+            data=filtered_df.sample(sample_size),
+            x="longitude",
+            y="latitude",
+            size="population",
+            legend=False,
+            ax=ax
+        )
 
     st.pyplot(fig)
 
-# Boxplot and Violin Plot
 c5, c6 = st.columns(2)
 
 with c5:
@@ -200,26 +225,31 @@ with c6:
 
     st.pyplot(fig)
 
-# Heatmap
 st.subheader("Heatmap - Correlation Matrix")
 
-numeric_df = filtered_df.select_dtypes(include=["float64", "int64"])
-
-fig, ax = plt.subplots(figsize=(8, 6))
-
-sns.heatmap(
-    numeric_df.corr(numeric_only=True),
-    annot=True,
-    cmap="coolwarm",
-    ax=ax
+numeric_df = filtered_df.select_dtypes(
+    include=["float64", "int64"]
 )
 
-st.pyplot(fig)
+if len(numeric_df.columns) > 1:
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-# Line Chart
+    sns.heatmap(
+        numeric_df.corr(),
+        annot=True,
+        cmap="coolwarm",
+        ax=ax
+    )
+
+    st.pyplot(fig)
+
 st.subheader("Line Chart - Population Trend")
 
-line_data = filtered_df.groupby("country_code")["population"].mean().head(15)
+line_data = (
+    filtered_df.groupby("country_code")["population"]
+    .mean()
+    .head(15)
+)
 
 fig, ax = plt.subplots(figsize=(10, 5))
 
@@ -229,14 +259,15 @@ line_data.plot(
     ax=ax
 )
 
-ax.set_ylabel("Average Population")
-
 st.pyplot(fig)
 
-# Area Chart
 st.subheader("Area Chart - Population by Country")
 
-area_data = filtered_df.groupby("country_code")["population"].sum().head(10)
+area_data = (
+    filtered_df.groupby("country_code")["population"]
+    .sum()
+    .head(10)
+)
 
 fig, ax = plt.subplots(figsize=(10, 5))
 
@@ -247,7 +278,6 @@ area_data.plot(
 
 st.pyplot(fig)
 
-# Count Plot
 st.subheader("Count Plot - Feature Class")
 
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -260,5 +290,4 @@ sns.countplot(
 
 st.pyplot(fig)
 
-# Success Message
 st.success("Dashboard Loaded Successfully")
