@@ -33,7 +33,7 @@ df["population"] = df["population"].fillna(0)
 # Convert safely
 df["population"] = df["population"].astype(float)
 
-    return df
+return df
 
 df = load_data()
 
