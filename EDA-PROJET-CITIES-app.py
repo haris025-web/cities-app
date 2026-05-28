@@ -42,7 +42,8 @@ def load_data():
 
 # Load Dataset
 df = load_data()
-
+df["population"] = pd.to_numeric(df["population"], errors="coerce")
+df["population"] = df["population"].fillna(0)
 # Dashboard Title
 st.title("🌍 Global Cities Data Visualization Dashboard")
 st.markdown(
@@ -62,8 +63,8 @@ selected_countries = st.sidebar.multiselect(
 )
 
 # Population Filter
-min_pop = int(df["population"].min())
-max_pop = int(df["population"].max())
+min_pop = 0
+max_pop = int(df["population"].fillna(0).max())
 
 population_range = st.sidebar.slider(
     "Population Range",
