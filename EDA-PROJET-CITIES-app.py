@@ -364,3 +364,15 @@ sns.countplot(
 st.pyplot(fig)
 
 st.success("Dashboard Loaded Successfully")
+
+st.markdown("---")
+
+st.markdown("""
+### 🌍 Global Cities Dashboard
+
+Built by Haris Ahmad
+
+Data Source: GeoNames
+
+Powered by Streamlit & Plotly
+""")
