@@ -127,7 +127,7 @@ if filtered_df.empty:
 
 # KPI Cards
 with tab1:
-k1, k2, k3, k4 = st.columns(4)
+    k1, k2, k3, k4 = st.columns(4)
 
 k1.metric(
     "🏙️ Cities",
