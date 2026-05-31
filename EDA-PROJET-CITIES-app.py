@@ -201,6 +201,26 @@ st.download_button(
     file_name="filtered_cities.csv",
     mime="text/csv"
 )
+st.subheader("🤖 AI Insights")
+
+largest_city = filtered_df.loc[
+    filtered_df["population"].idxmax()
+]
+
+st.info(
+    f"🏆 The most populated city is {largest_city['name']} "
+    f"with {largest_city['population']:,.0f} people."
+)
+
+st.info(
+    f"🌍 Countries represented: "
+    f"{filtered_df['country_code'].nunique()}"
+)
+
+st.info(
+    f"🏙️ Total cities displayed: "
+    f"{len(filtered_df):,}"
+)
 # Charts
 with tab3:
     c1, c2 = st.columns(2)
