@@ -158,7 +158,7 @@ st.metric(
 
 st.markdown("---")
 with tab2:
-st.subheader("🌍 Interactive World Map")
+    st.subheader("🌍 Interactive World Map")
 
 map_df = filtered_df.dropna(
     subset=["latitude", "longitude"]
