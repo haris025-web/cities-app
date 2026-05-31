@@ -149,6 +149,19 @@ st.plotly_chart(
     fig,
     use_container_width=True
 )
+st.subheader("🏆 Top 10 Most Populated Cities")
+
+top10 = (
+    filtered_df
+    .sort_values("population", ascending=False)
+    [["name", "country_code", "population"]]
+    .head(10)
+)
+
+st.dataframe(
+    top10,
+    use_container_width=True
+)
 # Charts
 c1, c2 = st.columns(2)
 
