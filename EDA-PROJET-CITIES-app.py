@@ -55,6 +55,11 @@ if df.empty:
 
 # Dashboard Title
 st.title("🌍 Global Cities Data Visualization Dashboard")
+tab1, tab2, tab3 = st.tabs([
+    "📊 Dashboard",
+    "🌍 Map",
+    "📈 Statistics"
+])
 st.markdown(
     "Professional interactive dashboard built with Streamlit, Pandas, Matplotlib, and Seaborn."
 )
@@ -121,6 +126,7 @@ if filtered_df.empty:
     st.stop()
 
 # KPI Cards
+with tab1:
 k1, k2, k3, k4 = st.columns(4)
 
 k1.metric(
@@ -151,6 +157,7 @@ st.metric(
 )
 
 st.markdown("---")
+with tab2:
 st.subheader("🌍 Interactive World Map")
 
 map_df = filtered_df.dropna(
@@ -195,6 +202,7 @@ st.download_button(
     mime="text/csv"
 )
 # Charts
+with tab3:
 c1, c2 = st.columns(2)
 
 with c1:
