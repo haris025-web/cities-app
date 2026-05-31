@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 
 # Page Config
 st.set_page_config(page_title="Global Cities Dashboard", layout="wide")
@@ -128,7 +129,26 @@ k3.metric("Max Population", f"{filtered_df['population'].max():,.0f}")
 k4.metric("Countries", filtered_df["country_code"].nunique())
 
 st.markdown("---")
+st.subheader("🌍 Interactive World Map")
 
+map_df = filtered_df.dropna(
+    subset=["latitude", "longitude"]
+)
+
+fig = px.scatter_geo(
+    map_df,
+    lat="latitude",
+    lon="longitude",
+    hover_name="name",
+    color="country_code",
+    size="population",
+    projection="natural earth"
+)
+
+st.plotly_chart(
+    fig,
+    use_container_width=True
+)
 # Charts
 c1, c2 = st.columns(2)
 
