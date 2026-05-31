@@ -162,6 +162,16 @@ st.dataframe(
     top10,
     use_container_width=True
 )
+st.subheader("📥 Export Data")
+
+csv = filtered_df.to_csv(index=False)
+
+st.download_button(
+    label="Download Filtered Cities CSV",
+    data=csv,
+    file_name="filtered_cities.csv",
+    mime="text/csv"
+)
 # Charts
 c1, c2 = st.columns(2)
 
