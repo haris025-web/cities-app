@@ -123,10 +123,32 @@ if filtered_df.empty:
 # KPI Cards
 k1, k2, k3, k4 = st.columns(4)
 
-k1.metric("Total Records", f"{len(filtered_df):,}")
-k2.metric("Average Population", f"{filtered_df['population'].mean():,.0f}")
-k3.metric("Max Population", f"{filtered_df['population'].max():,.0f}")
-k4.metric("Countries", filtered_df["country_code"].nunique())
+k1.metric(
+    "🏙️ Cities",
+    f"{len(filtered_df):,}"
+)
+
+k2.metric(
+    "👥 Avg Population",
+    f"{filtered_df['population'].mean():,.0f}"
+)
+
+k3.metric(
+    "🚀 Largest Population",
+    f"{filtered_df['population'].max():,.0f}"
+)
+
+k4.metric(
+    "🌍 Countries",
+    filtered_df["country_code"].nunique()
+)
+st.metric(
+    "🏆 Largest City",
+    filtered_df.loc[
+        filtered_df["population"].idxmax(),
+        "name"
+    ]
+)
 
 st.markdown("---")
 st.subheader("🌍 Interactive World Map")
