@@ -203,7 +203,7 @@ st.download_button(
 )
 # Charts
 with tab3:
-c1, c2 = st.columns(2)
+    c1, c2 = st.columns(2)
 
 with c1:
     st.subheader("Bar Chart - Top Countries by City Count")
