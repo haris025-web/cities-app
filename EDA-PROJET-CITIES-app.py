@@ -387,6 +387,28 @@ st.success("Dashboard Loaded Successfully")
 
 st.markdown("---")
 
+st.subheader("📖 About This Project")
+
+st.write("""
+This dashboard analyzes global city data using the GeoNames dataset.
+
+Features:
+- 🌍 Interactive World Map
+- 📊 Statistical Analysis
+- 🏙️ City Explorer
+- 📥 CSV Download
+- 🤖 AI Insights
+
+Built with Streamlit, Pandas, Plotly, Matplotlib and Seaborn.
+""")
+
+st.markdown("---")
+
+st.caption(
+    "Built by Haris Ahmad • Data Source: GeoNames • Powered by Streamlit"
+)
+st.markdown("---")
+
 st.markdown("""
 ### 🌍 Global Cities Dashboard
 
